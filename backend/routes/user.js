@@ -1,6 +1,7 @@
 const express = require('express');
 const zod = require('zod');
 const { User } = require("../db");
+const { Account } = require("../db");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require('../config');
 
@@ -16,10 +17,8 @@ const signupSchema = zod.object({
 })
 
 // sign up
-router.post("/signup", (req,res) => {
+router.post("/signup", async (req,res) => {
     
-    const body = req.body;
-
     const { success } = signupSchema.safeParse(req.body);
 
     if(!success) {
@@ -28,19 +27,21 @@ router.post("/signup", (req,res) => {
         })
     }
 
-    const user = User.findOne({
-        username: body.username
+    
+    const existingUser = await User.findOne({
+        username: req.body.username
     })
-
-    if(user._id){
+    
+    if(existingUser){
         return res.status(411).json({
             message: "Email already taken / Incorrect Inputs"
         })
     }
     
-    const dbUser = await User.create(body);
+    const dbUser = await User.create(req.body); // error, undefined object.
+
     
-    const userId = user._id;
+    const userId = dbUser._id;
     // Create a new Account
 
     await Account.create({
@@ -63,12 +64,12 @@ router.post("/signup", (req,res) => {
 
 const signinBody = zod.object({
     username: zod.string().email(),
-    password: zod.string().minLength(8)
+    password: zod.string()
 })
 
 // login
 router.post("/signin", async (req,res) => {
-    const {success} = signinBody.safeParse(req.body)
+    const {success} = signinBody.safeParse(req.body);
     if(!success) {
         return res.status(411).json({
             message: "Email already taken / incorrect inputs"
@@ -86,6 +87,7 @@ router.post("/signin", async (req,res) => {
         }, JWT_SECRET);
 
         res.json({
+            message: "Logged in!",
             token: token
         })
         return;
@@ -107,12 +109,14 @@ const updateBody = zod.object({
 })
 
 router.put("/",authMiddleware, async (req,res) => {
+    console.log("hello world")
     const {success} = updateBody.safeParse(req.body);
     if(!success) {
         res.status(411).json({
             message: "Error while updating information"
         })
     }
+    console.log("parsed properly")
     await User.updateOne({ _id: req.userId}, req.body);
 
     res.json({

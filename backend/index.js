@@ -1,7 +1,8 @@
 const express = require('express');
 const rootRouter = require("./routes/index");
 const accountRouter = require("./routes/account");
-const cors = require('cors')
+const cors = require('cors');
+const db = require('./db'); // Import database connection
 
 const app = express();
 

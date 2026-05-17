@@ -1,10 +1,16 @@
 const mongoose = require('mongoose');
 const { string } = require('zod');
 
-mongoose.connect("mongodb://localhost:27017/paytm")
+// Simple MongoDB connection
+mongoose.connect("mongodb://host.docker.internal:27017/paytm?replicaSet=rs&directConnection=true")
+    .then(() => console.log('✓ MongoDB connected'))
+    .catch(err => console.error('✗ MongoDB Error:', err));
 
+mongoose.connection.on('error', (err) => {
+    console.error('Connection error:', err.message);
+});
 
-//mongoose schema for the users tabl
+// mongoose schema for the users tabl
 
 
 const userSchema = new mongoose.Schema({
@@ -42,7 +48,7 @@ const User = mongoose.model('User',userSchema);
 
 const accountSchema = new mongoose.Schema({
     userId: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
@@ -55,5 +61,6 @@ const accountSchema = new mongoose.Schema({
 const Account = mongoose.model('Account',accountSchema);
 
 module.exports = {
-    User
+    User,
+    Account
 };
