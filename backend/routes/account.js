@@ -1,15 +1,15 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const { User } = require("../db");
-const {Account} = require("../db");
+const { Account } = require("../db");
 const { authMiddleware } = require("../middleware");
 
 const router = express.Router();
 
 // an endpoint for user to get their balance
+// using transactions
 router.get("/balance",authMiddleware, async (req,res) => {
     
-    console.log("fetched balance");
     const account = await Account.findOne({
         userId: req.userId
     });
@@ -25,7 +25,6 @@ router.post("/transfer",authMiddleware, async(req,res) => {
     // if it does exist, then 1st deduct the amount from sender's account
     // then credit the amount to reciever's amount
 
-    // using transactions
 
     const session = await mongoose.startSession();
 
