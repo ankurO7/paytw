@@ -2,7 +2,11 @@ const mongoose = require('mongoose');
 const { string } = require('zod');
 
 // Simple MongoDB connection
-mongoose.connect("mongodb://host.docker.internal:27017/paytm?replicaSet=rs&directConnection=true")
+mongoose.connect("mongodb://host.docker.internal:27017/paytm?replicaSet=rs&directConnection=true", {
+    maxPoolSize: 50,
+    minPoolSize: 10,
+    retryWrites: true
+})
     .then(() => console.log('✓ MongoDB connected'))
     .catch(err => console.error('✗ MongoDB Error:', err));
 
